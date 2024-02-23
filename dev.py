@@ -14,10 +14,15 @@ url = 'https://fastlineapidemo.azurewebsites.net/api/Consultas/Verificaciontique
 
 entradas = 0
 
+#Descomentar para enviar el puso
+#pin_salida = Pin(15, Pin.OUT)
+
 def abriTorniquete():
     print('Abriendo torniquete')
+    #pin_salida.on()
     time.sleep(5)
     print('Cerrar el paso')
+    #pin_salida.off()
 
 #function to connect to Wi-Fi network
 def cnctWifi():
@@ -45,6 +50,7 @@ def cnctWifi():
 #function to send http get request
 def getData():
     try:
+        global entradas
         lectura_qr = uart1.read()
         if lectura_qr is not None:
             #fecha_hora_actual = datetime.datetime.now()
@@ -56,10 +62,12 @@ def getData():
                 "qr": lectura_qr,
                 "idbus": "Bus_1",
                 "accion":  "ENTRADA",
-                "fecha":  "",
+                "fecha":  "2024-02-22T18:29:49.368",
                 "entradas":  entradas,
                 "salidas":  "0",
             }
+
+            print(data)
             response = requests.post(url, json=data)
 
             if response.status_code == 200:
