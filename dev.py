@@ -4,17 +4,14 @@ import requests
 import ujson as json
 from machine import UART, Pin
 
-ssid = 'Escrib'
-password = '21911298'
+redes_wifi = [
+    {'ssid': 'Escrib', 'password': '21911298'},
+    {'ssid': 'red', 'password': '123'},
+]
 
 uart1 = UART(1, baudrate=115200, tx=Pin(4), rx=Pin(5))
-
 wlan = network.WLAN(network.STA_IF)
-
 url = 'https://fastlineapidemo.azurewebsites.net/api/Consultas/Verificaciontiquete'
-
-#Descomentar para enviar el puso
-#pin_salida = Pin(15, Pin.OUT)
 
 def cargar_contador():
     try:
@@ -29,27 +26,32 @@ def guardar_contador(contador):
 
 def abriTorniquete():
     print('Abriendo torniquete')
-     #pin_salida.on()
+    # pin_salida.on()
     time.sleep(5)
     print('Cerrar el paso')
-     #pin_salida.off()
+    # pin_salida.off()
 
 def cnctWifi():
-    wlan.active(True)
-    wlan.connect(ssid, password)
-    max_wait = 10
-    while max_wait > 0:
-        if wlan.status() < 0 or wlan.status() >= 3:
-            break
-        max_wait -= 1
-        print('waiting for connection...')
-        time.sleep(1)
-    if wlan.status() != 3:
-        print('Network Connection has failed')
-    else:
-        print('connected')
-        status = wlan.ifconfig()
-        print('ip = ' + status[0])
+    for wifi in redes_wifi:
+        ssid = wifi['ssid']
+        password = wifi['password']
+        wlan.active(True)
+        wlan.connect(ssid, password)
+        max_wait = 10
+        while max_wait > 0:
+            if wlan.status() < 0 or wlan.status() >= 3:
+                break
+            max_wait -= 1
+            print('Waiting for connection to', ssid)
+            time.sleep(1)
+        if wlan.status() == 3:
+            print('Connected to', ssid)
+            status = wlan.ifconfig()
+            print('IP:', status[0])
+            return True
+        else:
+            print('Failed to connect to', ssid)
+    return False
 
 def getData():
     try:
@@ -58,14 +60,14 @@ def getData():
             contador = cargar_contador()
             contador += 1
             data = {
-                "idvalidador" : "1",
+                "idvalidador": "1",
                 "verificacion": "Rasp8erry",
                 "qr": "lectura_qr",
                 "idbus": "Bus_1",
-                "accion":  "ENTRADA",
-                "fecha":  "2024-02-22T18:29:49.368",
-                "entradas":  contador,
-                "salidas":  "0",
+                "accion": "ENTRADA",
+                "fecha": "2024-02-22T18:29:49.368",
+                "entradas": contador,
+                "salidas": "0",
             }
             print(data)
             guardar_contador(contador)
@@ -78,15 +80,19 @@ def getData():
     except Exception as e:
         print("Error:", e)
 
-cnctWifi() 
-   
+# Intentar conectar a una red Wi-Fi
+if not cnctWifi():
+    print("No se pudo conectar a ninguna red Wi-Fi.")
+    # Aquí puedes agregar acciones adicionales si no se puede conectar a ninguna red, como dormir el dispositivo o intentarlo de nuevo más tarde.
+
+# Bucle principal
 while True:
     if wlan.isconnected():
-        print("sending get request...")
+        print("Sending GET request...")
         getData()
     else:
-        print("attempting to reconnect...")
-        getData()
+        print("Attempting to reconnect...")
         wlan.disconnect()
-        cnctWifi()
+        if not cnctWifi():
+            print("Failed to reconnect. Retrying...")
     time.sleep(1)
