@@ -4,8 +4,8 @@ import requests
 import ujson as json
 from machine import UART, Pin
 
-ssid = 'Datasys2'
-password = 'Datasys504'
+ssid = 'Escrib'
+password = '21911298'
 
 uart1 = UART(1, baudrate=115200, tx=Pin(4), rx=Pin(5))
 
@@ -67,12 +67,12 @@ def getData():
                 "entradas":  contador,
                 "salidas":  "0",
             }
+            print(data)
             guardar_contador(contador)
-            #response = requests.post(url, json=data)
-            #if response.status_code == 200:
-            if 200 == 200:#Eliminar luego
-                #print('Respuesta:', response.json())
-                abriTorniquete()
+            abriTorniquete()
+            response = requests.post(url, json=data)
+            if response.status_code == 200:
+                print('Respuesta:', response.json())
             else:
                 print('Error en la petición POST. Código de estado:', response.status_code)
     except Exception as e:
@@ -86,6 +86,7 @@ while True:
         getData()
     else:
         print("attempting to reconnect...")
+        getData()
         wlan.disconnect()
         cnctWifi()
     time.sleep(1)
