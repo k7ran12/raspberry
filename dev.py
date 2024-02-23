@@ -13,6 +13,8 @@ uart1 = UART(1, baudrate=115200, tx=Pin(4), rx=Pin(5))
 wlan = network.WLAN(network.STA_IF)
 url = 'https://fastlineapidemo.azurewebsites.net/api/Consultas/Verificaciontiquete'
 
+led = Pin("LED", Pin.OUT)
+
 def cargar_contador():
     try:
         with open('contador.json', 'r') as f:
@@ -48,6 +50,7 @@ def cnctWifi():
             print('Connected to', ssid)
             status = wlan.ifconfig()
             print('IP:', status[0])
+            led.on()
             return True
         else:
             print('Failed to connect to', ssid)
@@ -93,6 +96,7 @@ while True:
     else:
         print("Lost connection to Wi-Fi. Attempting to reconnect...")
         wlan.disconnect()
+        led.off()
         while not cnctWifi():
             print("Failed to reconnect. Retrying...")
             time.sleep(5)
