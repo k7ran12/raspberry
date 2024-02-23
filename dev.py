@@ -80,19 +80,21 @@ def getData():
     except Exception as e:
         print("Error:", e)
 
-# Intentar conectar a una red Wi-Fi
-if not cnctWifi():
-    print("No se pudo conectar a ninguna red Wi-Fi.")
-    # Aquí puedes agregar acciones adicionales si no se puede conectar a ninguna red, como dormir el dispositivo o intentarlo de nuevo más tarde.
+while not cnctWifi():
+    print("Failed to connect to any Wi-Fi network. Retrying...")
+    time.sleep(5)
 
-# Bucle principal
+print("Connected to Wi-Fi network. Starting main loop...")
+
 while True:
     if wlan.isconnected():
         print("Sending GET request...")
         getData()
     else:
-        print("Attempting to reconnect...")
+        print("Lost connection to Wi-Fi. Attempting to reconnect...")
         wlan.disconnect()
-        if not cnctWifi():
+        while not cnctWifi():
             print("Failed to reconnect. Retrying...")
+            time.sleep(5)
+
     time.sleep(1)
