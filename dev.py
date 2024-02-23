@@ -73,6 +73,13 @@ def getData():
                 "salidas": "0",
             }
             print(data)
+            led.off()
+            time.sleep(0.1)
+            led.on()
+            time.sleep(0.1)
+            led.off()
+            time.sleep(0.1)
+            led.on()
             guardar_contador(contador)
             abriTorniquete()
             response = requests.post(url, json=data)
@@ -94,6 +101,7 @@ while True:
         print("Sending GET request...")
         getData()
     else:
+        getData()
         print("Lost connection to Wi-Fi. Attempting to reconnect...")
         wlan.disconnect()
         led.off()
