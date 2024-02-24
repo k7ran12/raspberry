@@ -15,6 +15,8 @@ url = 'https://fastlineapidemo.azurewebsites.net/api/Consultas/Verificaciontique
 
 led = Pin("LED", Pin.OUT)
 
+temp = 0
+
 def cargar_contador():
     try:
         with open('contador.json', 'r') as f:
@@ -96,17 +98,9 @@ while not cnctWifi():
 
 print("Connected to Wi-Fi network. Starting main loop...")
 
-ultimo_envio = time.ticks_ms()
-
-while True:
-    if wlan.isconnected():
-        print("Sending GET request...")
-        getData()
-
-    if time.ticks_diff(time.ticks_ms(), ultimo_envio) >= 10000:
-        contador = cargar_contador()
-        print("Cada 10 segundos")
-        data = {
+def sendData():
+    contador = cargar_contador()
+    data = {
             "verificacion": "Conex1on",
             "qr": "",
             "idBus": "",
@@ -115,16 +109,22 @@ while True:
             "entradas": contador,
             "salidas": 0
         }
-        print('enviando..')
-        response = requests.post(url, json=data)
-        print('salio..')
+    print('enviando..')
+    requests.post(url, json=data)
 
+while True:
+    if wlan.isconnected():
+        temp += 1
+        print("Sending GET request...")
+        getData()
+        if temp > 10:
+            sendData()
     else:
+        getData()
         print("Lost connection to Wi-Fi. Attempting to reconnect...")
         wlan.disconnect()
         led.off()
         while not cnctWifi():
-            getData()
             print("Failed to reconnect. Retrying...")
             time.sleep(5)
 
