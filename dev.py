@@ -103,11 +103,11 @@ while True:
         print("Sending GET request...")
         getData()
     else:
-        getData()
         print("Lost connection to Wi-Fi. Attempting to reconnect...")
         wlan.disconnect()
         led.off()
         while not cnctWifi():
+            getData()
             print("Failed to reconnect. Retrying...")
             time.sleep(5)
     
