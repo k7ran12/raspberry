@@ -96,6 +96,8 @@ while not cnctWifi():
 
 print("Connected to Wi-Fi network. Starting main loop...")
 
+ultimo_envio = time.ticks_ms()
+
 while True:
     if wlan.isconnected():
         print("Sending GET request...")
@@ -108,5 +110,21 @@ while True:
         while not cnctWifi():
             print("Failed to reconnect. Retrying...")
             time.sleep(5)
+    
+    if time.ticks_diff(time.ticks_ms(), ultimo_envio) >= 10000:
+        contador = cargar_contador()
+        print("Cada 10 segundos")
+        data = {
+            "verificacion": "Conex1on",
+            "qr": "",
+            "idBus": "",
+            "accion": "",
+            "fecha": "2024-02-22T18:29:49.368",
+            "entradas": contador,
+            "salidas": 0
+        }
+        response = requests.post(url, json=data)
+        if response.status_code == 200:
+            ultimo_envio = time.ticks_ms()
 
     time.sleep(1)
