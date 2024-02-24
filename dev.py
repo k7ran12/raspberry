@@ -110,7 +110,10 @@ def sendData():
             "salidas": 0
         }
     print('enviando..')
-    requests.post(url, json=data)
+    try:
+        requests.post(url, json=data)
+    except Exception as e:
+        print("Error sending data:", e)
 
 while True:
     if wlan.isconnected():
